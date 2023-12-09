@@ -1,9 +1,7 @@
 {
   "type": "module",
   "scripts": {
-    "start": "pm2 start ecosystem.config.cjs --name binance-bot",
-    "stop": "pm2 stop binance-bot",
-    "restart": "pm2 restart binance-bot"
+    "start": "node src/index.js"
   },
   "dependencies": {
     "airtable": "^0.12.2",
@@ -14,8 +12,7 @@
   },
   "devDependencies": {
     "jest": "^29.7.0",
-    "jest-mock": "^29.7.0",
-    "pm2": "^5.1.3"
+    "jest-mock": "^29.7.0"
   },
   "engines": {
     "node": ">=14.0.0"

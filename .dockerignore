@@ -1,7 +1,0 @@
-# .dockerignore
-.env*
-node_modules
-*.log
-serviceA*
-path
-workspace
