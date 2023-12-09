@@ -1,0 +1,25 @@
+version: "3.8"
+
+services:
+  binance-bot:
+    image: node:14
+    container_name: binance-bot
+    working_dir: /app
+    command: npm start
+    environment:
+      - NODE_ENV=production
+    volumes:
+      - ../binance_bot:/app
+    ports:
+      - "3000:3000"
+    networks:
+      my_network:
+        ipv4_address: 172.18.0.2  # Adjust the IP address as needed
+
+networks:
+  my_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.18.0.0/16  # Adjust the subnet as needed
