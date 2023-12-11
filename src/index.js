@@ -2,14 +2,14 @@ import { logger } from "./logger.js";
 import createWebSocket from "./websocket.js";
 import { handleWebSocketMessage } from "./websocketManager.js";
 
-const tradeState = {
+let tradeState = {
   orderId: 0,
   open: false,
   price: 0,
   trailPrice: 0,
   trailOffset: 7,
   stop: 0,
-  size: 0.01,
+  size: 0.05,
   symbol: "ethusdt_perpetual",
   SYMBOL: "ETHUSDT",
 };
@@ -32,7 +32,9 @@ const handleWebSocketClose = (code, reason) => {
   if (code === 1000) {
     logger.info("WebSocket connection closed gracefully");
   } else {
-    logger.warn(`WebSocket connection closed unexpectedly. Code: ${code}, Reason: ${reason}`);
+    logger.warn(
+      `WebSocket connection closed unexpectedly. Code: ${code}, Reason: ${reason}`
+    );
   }
 };
 
@@ -45,7 +47,7 @@ const initWebSocket = async () => {
     const { ws } = await createWebSocket(tradeState.symbol);
 
     ws.on("open", handleWebSocketOpen);
-    ws.on("message", handleWebSocketMessage);
+    ws.on("message", (data) => handleWebSocketMessage(data, tradeState, logger));
     ws.on("close", handleWebSocketClose);
     ws.on("error", handleWebSocketError);
 

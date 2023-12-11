@@ -8,29 +8,67 @@ const initialTradeState = {
   trailPrice: 0,
   trailOffset: 7,
   stop: 0,
-  size: 0.01,
+  size: 0.05,
   symbol: "ethusdt_perpetual",
   SYMBOL: "ETHUSDT",
 };
 
 export const isTradeConditionMet = (volume, open, close) => {
+  logger.info("Reached condition met");
   volume = parseFloat(volume);
   open = parseFloat(open);
   close = parseFloat(close);
   return volume > 200000 && open > close && open - close > 18;
 };
 
-export const executeTradeLogic = async (tradeState, open, high, low, close, volume) => {
-  const executedTrade = await executeTrade(tradeState, "LONG", "Entry", "BUY", open, high, low, close, volume);
-  return executedTrade;
+export const executeTradeLogic = (tradeState, kline) => {
+  const { o: open, h: high, l: low, c: close, v: volume } = kline;
+
+  executeTrade(
+    tradeState,
+    "LONG",
+    "Entry",
+    "BUY",
+    open,
+    high,
+    low,
+    close,
+    volume
+  );
 };
 
-export const executeExitLogic = async (tradeState, open, high, low, close, volume) => {
-  const exitedTrade = await exitTrade(tradeState, "SELL", "LONG", "Exit", open, high, low, close, volume);
-  return exitedTrade;
+export const executeExitLogic = async (
+  open,
+  high,
+  low,
+  close,
+  volume,
+  tradeState
+) => {
+  await exitTrade(
+    tradeState,
+    "SELL",
+    "LONG",
+    "Exit",
+    open,
+    high,
+    low,
+    close,
+    volume
+  );
 };
 
-const executeTrade = async (tradeState, direction, type, side, open, high, low, close, volume) => {
+const executeTrade = async (
+  tradeState,
+  direction,
+  type,
+  side,
+  open,
+  high,
+  low,
+  close,
+  volume
+) => {
   const order = {
     symbol: tradeState.SYMBOL,
     side,
@@ -41,39 +79,57 @@ const executeTrade = async (tradeState, direction, type, side, open, high, low, 
     timeInForce: "GTC",
   };
 
-  const response = await binanceClient.submitNewOrder(order);
+  try {
+    const response = await binanceClient.submitNewOrder(order);
 
-  tradeState.orderId = response.orderId;
+    tradeState.orderId = response.orderId;
 
-  const tradeDetails = {
-    orderId: response.orderId,
-    status: response.status,
-    symbol: tradeState.SYMBOL,
-    Time: new Date(response.updateTime),
-    raw: JSON.stringify(response),
-    Price: parseFloat(response.price),
-    open,
-    high,
-    low,
-    close,
-    volume,
-    Direction: direction,
-    Type: type,
-  };
+    open = parseFloat(open);
+    high = parseFloat(high);
+    low = parseFloat(low);
+    close = parseFloat(close);
+    volume = parseFloat(volume);
 
-  airtableBase("Trades").create(tradeDetails, (err, record) => {
-    if (err) {
-      logger.error(err);
-      return;
-    }
+    const tradeDetails = {
+      orderId: response.orderId,
+      status: response.status,
+      symbol: tradeState.SYMBOL,
+      Time: new Date(response.updateTime),
+      raw: JSON.stringify(response),
+      Price: parseFloat(response.price),
+      open,
+      high,
+      low,
+      close,
+      volume,
+      Direction: direction,
+      Type: type,
+    };
 
-    logger.info(`Trade details saved. Record ID: ${record.getId()}`);
-  });
+    airtableBase("Trades").create(tradeDetails, (err, record) => {
+      if (err) {
+        logger.error(err);
+        return;
+      }
 
-  return tradeDetails;
+      logger.info(`Trade details saved. Record ID: ${record.getId()}`);
+    });
+  } catch (err) {
+    logger.error(err);
+  }
 };
 
-const exitTrade = async (tradeState, side, direction, type, open, high, low, close, volume) => {
+const exitTrade = async (
+  tradeState,
+  side,
+  direction,
+  type,
+  open,
+  high,
+  low,
+  close,
+  volume
+) => {
   const order = {
     symbol: tradeState.SYMBOL,
     side,
@@ -84,35 +140,38 @@ const exitTrade = async (tradeState, side, direction, type, open, high, low, clo
     timeInForce: "GTC",
   };
 
-  const response = await binanceClient.submitNewOrder(order);
+  try {
+    const response = await binanceClient.submitNewOrder(order);
 
-  const tradeDetails = {
-    orderId: response.orderId,
-    status: response.status,
-    symbol: tradeState.SYMBOL,
-    Time: new Date(response.updateTime),
-    raw: JSON.stringify(response),
-    Price: parseFloat(response.price),
-    open,
-    high,
-    low,
-    close,
-    volume,
-    Direction: direction,
-    Type: type,
-  };
+    const tradeDetails = {
+      orderId: response.orderId,
+      status: response.status,
+      symbol: tradeState.SYMBOL,
+      Time: new Date(response.updateTime),
+      raw: JSON.stringify(response),
+      Price: parseFloat(response.price),
+      open,
+      high,
+      low,
+      close,
+      volume,
+      Direction: direction,
+      Type: type,
+    };
 
-  airtableBase("Trades").create(tradeDetails, (err, record) => {
-    if (err) {
-      logger.error(err);
-      return;
-    }
+    airtableBase("Trades").create(tradeDetails, (err, record) => {
+      if (err) {
+        logger.error(err);
+        return;
+      }
 
-    logger.info(`Trade details saved. Record ID: ${record.getId()}`);
-  });
+      logger.info(`Trade details saved. Record ID: ${record.getId()}`);
+    });
 
-  tradeState = initialTradeState;
-  return tradeDetails;
+    tradeState = initialTradeState;
+  } catch (err) {
+    logger.error(err);
+  }
 };
 
 export const shouldExit = (tradeState, close) => {

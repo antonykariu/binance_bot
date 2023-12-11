@@ -1,3 +1,4 @@
+import { logger } from "./logger.js";
 import {
   isTradeConditionMet,
   executeTradeLogic,
@@ -7,24 +8,31 @@ import {
 
 export const handleWebSocketMessage = (data, tradeState, logger) => {
   const klineData = JSON.parse(data);
-  const { e: eventType, k: kline } = klineData;
+  const { k: kline } = klineData;
 
-  if (eventType === "kline" && kline.x) {
+  if (kline.x) {
+    logger.info("Kline x reached");
     handleKlineEvent(kline, tradeState, logger);
+  }
+  if (tradeState.open) {
+    adjustTrailingStop(kline, tradeState);
+    if (shouldExit(parseFloat(kline.c), tradeState)) {
+      executeExitStrategy(kline, tradeState);
+    }
   }
 };
 
 const handleKlineEvent = (kline, tradeState, logger) => {
+  logger.info("handling kline event");
+  logger.info(JSON.stringify(kline));
+  logger.info(JSON.stringify(tradeState));
   if (!tradeState.open) {
-    const { v: volume, o: open, c: close, h: high, l: low } = kline;
+    const { v: volume, o: open, c: close } = kline;
+
+    logger.info("passing kline to condition met");
 
     if (isTradeConditionMet(volume, open, close)) {
       executeTradeAtCandleClose(kline, tradeState, logger);
-    }
-  } else {
-    adjustTrailingStop(kline, tradeState);
-    if (shouldExit(parseFloat(kline.c), tradeState)) {
-      executeExitStrategy(kline, tradeState);
     }
   }
 };
@@ -35,7 +43,8 @@ const executeTradeAtCandleClose = (kline, tradeState, logger) => {
   tradeState.open = true;
   tradeState.stop = parseFloat(kline.c) - tradeState.trailOffset;
   tradeState.trailPrice = tradeState.stop;
-  executeTradeLogic(kline, tradeState);
+  logger.info(JSON.stringify(tradeState));
+  executeTradeLogic(tradeState, kline);
 };
 
 const adjustTrailingStop = (kline, tradeState) => {
@@ -46,6 +55,9 @@ const adjustTrailingStop = (kline, tradeState) => {
     close > tradeState.trailPrice + 14
   ) {
     tradeState.trailPrice += 7;
+    logger.info(
+      "adjusting trailprice for the first time" + tradeState.trailPrice
+    );
   }
 
   if (
@@ -54,6 +66,7 @@ const adjustTrailingStop = (kline, tradeState) => {
   ) {
     tradeState.trailPrice =
       tradeState.trailPrice + (close - tradeState.trailPrice + 7);
+    logger.info("adjusting trailprice" + tradeState.trailPrice);
   }
 };
 
