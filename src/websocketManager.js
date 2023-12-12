@@ -58,15 +58,10 @@ const adjustTrailingStop = (kline, tradeState) => {
     logger.info(
       "adjusting trailprice for the first time" + tradeState.trailPrice
     );
-  }
-
-  if (
-    tradeState.stop !== tradeState.trailPrice &&
-    close > tradeState.trailPrice + 7
-  ) {
-    tradeState.trailPrice =
-      tradeState.trailPrice + (close - tradeState.trailPrice + 7);
-    logger.info("adjusting trailprice" + tradeState.trailPrice);
+  } else if (close > tradeState.trailPrice + tradeState.trailOffset) {
+    tradeState.trailPrice +=
+      close - (tradeState.trailPrice + tradeState.trailOffset);
+    logger.info("adjusting trailprice " + tradeState.trailPrice);
   }
 };
 
