@@ -8,7 +8,7 @@ const initialTradeState = {
   trailPrice: 0,
   trailOffset: 7,
   stop: 0,
-  size: 0.05,
+  size: 0.4,
   symbol: "ethusdt_perpetual",
   SYMBOL: "ETHUSDT",
 };
