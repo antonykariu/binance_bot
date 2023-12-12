@@ -16,7 +16,7 @@ export const handleWebSocketMessage = (data, tradeState, logger) => {
   }
   if (tradeState.open) {
     adjustTrailingStop(kline, tradeState);
-    if (shouldExit(parseFloat(kline.c), tradeState)) {
+    if (shouldExit(tradeState, parseFloat(kline.c))) {
       executeExitStrategy(kline, tradeState);
     }
   }
