@@ -11,7 +11,6 @@ export const handleWebSocketMessage = (data, tradeState, logger) => {
   const { k: kline } = klineData;
 
   if (kline.x) {
-    logger.info("Kline x reached");
     handleKlineEvent(kline, tradeState, logger);
   }
   if (tradeState.open) {
@@ -23,13 +22,8 @@ export const handleWebSocketMessage = (data, tradeState, logger) => {
 };
 
 const handleKlineEvent = (kline, tradeState, logger) => {
-  logger.info("handling kline event");
-  logger.info(JSON.stringify(kline));
-  logger.info(JSON.stringify(tradeState));
   if (!tradeState.open) {
     const { v: volume, o: open, c: close } = kline;
-
-    logger.info("passing kline to condition met");
 
     if (isTradeConditionMet(volume, open, close)) {
       executeTradeAtCandleClose(kline, tradeState, logger);

@@ -14,10 +14,6 @@ let tradeState = {
   SYMBOL: "ETHUSDT",
 };
 
-const logWebSocketMessage = () => {
-  logger.info("WebSocket is still running...");
-};
-
 const closeWebSocket = (ws) => {
   logger.info("Closing WebSocket connection...");
   ws.close();
@@ -50,9 +46,6 @@ const initWebSocket = async () => {
     ws.on("message", (data) => handleWebSocketMessage(data, tradeState, logger));
     ws.on("close", handleWebSocketClose);
     ws.on("error", handleWebSocketError);
-
-    // Log a message every minute to show the WebSocket is running
-    setInterval(logWebSocketMessage, 60 * 1000); // 60 seconds * 1000 milliseconds
 
     process.on("SIGINT", () => closeWebSocket(ws));
   } catch (error) {
