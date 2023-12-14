@@ -47,9 +47,9 @@ export const executeExitLogic = async (
 ) => {
   await exitTrade(
     tradeState,
-    "SELL",
     "LONG",
     "Exit",
+    "BUY",
     open,
     high,
     low,
@@ -135,7 +135,7 @@ const exitTrade = async (
     side,
     type: "STOP_MARKET",
     quantity: tradeState.size,
-    stopPrice: tradeState.stop,
+    stopPrice: tradeState.stop-1,
     closePosition: true,
     timeInForce: "GTC",
   };
