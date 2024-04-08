@@ -2,17 +2,7 @@ import { logger } from "./logger.js";
 import createWebSocket from "./websocket.js";
 import { handleWebSocketMessage } from "./websocketManager.js";
 
-let tradeState = {
-  orderId: 0,
-  open: false,
-  price: 0,
-  trailPrice: 0,
-  trailOffset: 7,
-  stop: 0,
-  size: 0.4,
-  symbol: "ethusdt_perpetual",
-  SYMBOL: "ETHUSDT",
-};
+import { tradeState } from "./state.js";
 
 const closeWebSocket = (ws) => {
   logger.info("Closing WebSocket connection...");

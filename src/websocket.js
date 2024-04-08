@@ -17,7 +17,7 @@ const getListenKey = async () => {
 
 const getWebSocketUrl = (listenKey,symbol) => {
   const baseUrl = "wss://fstream.binance.com/ws/";
-  return `${baseUrl}${listenKey}/${symbol}@continuousKline_15m`;
+  return `${baseUrl}${listenKey}/${symbol}_perpetual@continuousKline_1m`;
 };
 
 export default createWebSocket;

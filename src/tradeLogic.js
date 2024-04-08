@@ -1,24 +1,22 @@
-import { airtableBase, binanceClient } from "./services.js";
+import { airtableBase, binanceClient, taapi } from "./services.js";
 import { logger } from "./logger.js";
+import { initialTradeState } from "./state.js";
 
-const initialTradeState = {
-  orderId: 0,
-  open: false,
-  price: 0,
-  trailPrice: 0,
-  trailOffset: 7,
-  stop: 0,
-  size: 0.4,
-  symbol: "ethusdt_perpetual",
-  SYMBOL: "ETHUSDT",
-};
-
-export const isTradeConditionMet = (volume, open, close) => {
+export const isTradeConditionMet = async (volume, open, close) => {
   logger.info("Reached condition met");
   volume = parseFloat(volume);
   open = parseFloat(open);
   close = parseFloat(close);
-  return volume > 200000 && open > close && open - close > 18;
+
+  const RSI = await taapi.getIndicator("rsi", "BTC/USDT", "15m").then( rsi => rsi.value);
+
+  console.log("taapi", volume, RSI)
+
+  if (volume > 19000 && RSI < 30 || RSI > 70) {
+    return true
+  } else {
+    return  false
+  }
 };
 
 export const executeTradeLogic = (tradeState, kline) => {

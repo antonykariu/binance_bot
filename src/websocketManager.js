@@ -21,18 +21,18 @@ export const handleWebSocketMessage = (data, tradeState, logger) => {
   }
 };
 
-const handleKlineEvent = (kline, tradeState, logger) => {
+const handleKlineEvent = async(kline, tradeState, logger) => {
   if (!tradeState.open) {
     const { v: volume, o: open, c: close } = kline;
 
-    if (isTradeConditionMet(volume, open, close)) {
+    if (await isTradeConditionMet(volume, open, close)) {
       executeTradeAtCandleClose(kline, tradeState, logger);
     }
   }
 };
 
 const executeTradeAtCandleClose = (kline, tradeState, logger) => {
-  logger.info("Executing trade at hourly candle close...");
+  logger.info("Executing trade at 15m candle close...");
   tradeState.price = parseFloat(kline.c);
   tradeState.open = true;
   tradeState.stop = parseFloat(kline.c) - tradeState.trailOffset;
