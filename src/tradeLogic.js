@@ -67,6 +67,15 @@ const executeTrade = async (
   close,
   volume
 ) => {
+  Date.prototype.addDays = function (days) {
+    const newDate = new Date(this.valueOf());
+    newDate.setDate(newDate.getDate() + days);
+    return newDate;
+  };
+
+  const currentDate = new Date();
+  const futureDate = currentDate.addDays(2); // Add 2 days
+
   const order = {
     symbol: tradeState.SYMBOL,
     side,
