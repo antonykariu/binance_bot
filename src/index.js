@@ -33,7 +33,7 @@ const initWebSocket = async () => {
     const { ws } = await createWebSocket(tradeState.symbol);
 
     ws.on("open", handleWebSocketOpen);
-    ws.on("message", (data) => handleWebSocketMessage(data, tradeState, logger));
+    ws.on("message", (data) =>  handleWebSocketMessage(data, tradeState, logger));
     ws.on("close", handleWebSocketClose);
     ws.on("error", handleWebSocketError);
 
